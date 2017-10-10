@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity  implements GomsZoomView.Zoo
     private int mScreenWidth = 0;
 
     int mTargetWidth = 1080;
-    int mTargetHeight = 1080;
+    int mTargetHeight = 1440;
     Bitmap mBitmap;
 
     @Override
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity  implements GomsZoomView.Zoo
         String imageFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/StoreCamera/StoreCameraPhoto";
         String imageName = "storecamera_20170612164120_0.jpg";  //1440x1920
         //imageName = "storecamera_20170626174825_01.jpg";  //1440x1440
-        imageName = "780_1040.jpg";  //1440x1440
+        //imageName = "780_1040.jpg";  //1440x1440
         String fileFullPath = imageFolder  + File.separator + imageName;
 
 
@@ -93,23 +93,30 @@ public class MainActivity extends AppCompatActivity  implements GomsZoomView.Zoo
                       int first = StringUtil.stringToInt(DisplayUtil.getAspectRatioSplitValue(aspectRadio, 0));
                       int second = StringUtil.stringToInt(DisplayUtil.getAspectRatioSplitValue(aspectRadio, 1));
 
-                      if(first < second){
-                          bitmap = Bitmap.createBitmap(bitmap, 0, bitmap.getHeight() / 2 - bitmap.getWidth() / 2, bitmap.getWidth(), bitmap.getWidth()); // h > w 일 때, w기준으로 1:1 중앙 크롭
-                      }else{
-                          bitmap = Bitmap.createBitmap(bitmap, bitmap.getWidth() / 2 - bitmap.getHeight() / 2, 0, bitmap.getHeight(), bitmap.getHeight()); // h < w 일 때, h기준으로 1:1 중앙 크롭
+                      //1대 1 모드 처리
+                      if(mTargetWidth == mTargetHeight) {
+
+                          if (first < second) {
+                              bitmap = Bitmap.createBitmap(bitmap, 0, bitmap.getHeight() / 2 - bitmap.getWidth() / 2, bitmap.getWidth(), bitmap.getWidth()); // h > w 일 때, w기준으로 1:1 중앙 크롭
+                          } else {
+                              bitmap = Bitmap.createBitmap(bitmap, bitmap.getWidth() / 2 - bitmap.getHeight() / 2, 0, bitmap.getHeight(), bitmap.getHeight()); // h < w 일 때, h기준으로 1:1 중앙 크롭
+                          }
+
+                          GomsLog.d(TAG, "bitmap.getWidth() : " + bitmap.getWidth());
+                          GomsLog.d(TAG, "bitmap.getHeight() : " + bitmap.getHeight());
+
+                          /* 해당 사진보다 스크린 폭이 더 크면, 스크린 폭에 사진을 맞추어서 디스플레이 */
+                          if (mScreenWidth > bitmap.getWidth()) {
+                              mTargetWidth = mScreenWidth;
+                              mTargetHeight = mScreenWidth;
+                          } else {
+                              mTargetWidth = 1080;
+                              mTargetHeight = 1080;
+                          }
                       }
 
-                      GomsLog.d(TAG, "bitmap.getWidth() : " + bitmap.getWidth());
-                      GomsLog.d(TAG, "bitmap.getHeight() : " + bitmap.getHeight());
-
-                      /* 해당 사진보다 스크린 폭이 더 크면, 스크린 폭에 사진을 맞추어서 디스플레이 */
-                      if( mScreenWidth > bitmap.getWidth()){
-                          mTargetWidth = mScreenWidth;
-                          mTargetHeight = mScreenWidth;
-                      }else {
-                          mTargetWidth = 1080;
-                          mTargetHeight = 1080;
-                      }
+                      GomsLog.d(TAG, "mTargetWidth : " + mTargetWidth);
+                      GomsLog.d(TAG, "mTargetHeight : " + mTargetHeight);
 
                       mBitmap = GlideBitmapPool.getBitmap(mTargetWidth, mTargetHeight, Bitmap.Config.ARGB_8888);
                       mBitmap = Bitmap.createScaledBitmap(bitmap, mTargetWidth, mTargetHeight, true);
